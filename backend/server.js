@@ -392,11 +392,18 @@ app.get('/api/localization', (req, res) => {
 // 4. Engine Start
 // ==========================================
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-    console.log(`\n🛡️  SERVER SECURITY ACTIVATED`);
-    console.log(`   - Rate Limiting: Max 100 req / 15 mins via express-rate-limit`);
-    console.log(`   - CORS Restricted: ${process.env.FRONTEND_URL || '*'}`);
-    console.log(`   - Auth: Custom API Key (x-api-key header) strictly enforced on /api/*`);
-    console.log(`   - Firebase: ${db ? 'Connected' : 'Missing serviceAccountKey.json'}`);
-    console.log(`\n🔥 Secure Backend is running on http://localhost:${PORT}`);
-});
+
+// Only listen locally. Vercel serverless functions handle the port automatically.
+if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+    app.listen(PORT, () => {
+        console.log(`\n🛡️  SERVER SECURITY ACTIVATED`);
+        console.log(`   - Rate Limiting: Max 100 req / 15 mins via express-rate-limit`);
+        console.log(`   - CORS Restricted: ${process.env.FRONTEND_URL || '*'}`);
+        console.log(`   - Auth: Custom API Key (x-api-key header) strictly enforced on /api/*`);
+        console.log(`   - Firebase: ${db ? 'Connected' : 'Missing serviceAccountKey.json'}`);
+        console.log(`\n🔥 Secure Backend is running on http://localhost:${PORT}`);
+    });
+}
+
+// Export the app for Vercel Serverless Functions
+module.exports = app;
