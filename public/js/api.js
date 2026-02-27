@@ -3,7 +3,9 @@
    All fetch() wrappers for backend endpoints
    =================================================================== */
 
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? 'http://localhost:5000/api'
+    : 'https://the-core-coders.onrender.com/api';
 
 const Api = {
     // ── Helper: Build headers ──
