@@ -1,15 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="AgriSwap — A trust-enabled agricultural exchange platform for small farmers to transparently barter surplus produce, equipment, labor, and resources." />
+  <meta name="description"
+    content="AgriSwap — A trust-enabled agricultural exchange platform for small farmers to transparently barter surplus produce, equipment, labor, and resources." />
   <title>AgriSwap — Farm Exchange Platform</title>
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet" />
 
   <!-- Lucide Icons (CDN) -->
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
@@ -17,13 +21,23 @@
   <!-- Styles -->
   <link rel="stylesheet" href="css/style.css" />
 </head>
+
 <body>
 
   <!-- ===== NAVBAR ===== -->
   <nav id="navbar" class="navbar">
     <div class="container navbar__inner">
       <a href="#/" class="navbar__logo">
-        <span class="logo-icon">🌾</span>
+        <span class="logo-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+            <path d="M12 22V12M12 12C12 12 8 8 4 7M12 12C12 12 16 8 20 7M12 12C12 12 9 6 7 2M12 12C12 12 15 6 17 2"
+              stroke="#22c55e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+            <circle cx="4" cy="7" r="1.5" fill="#22c55e" opacity="0.6" />
+            <circle cx="20" cy="7" r="1.5" fill="#22c55e" opacity="0.6" />
+            <circle cx="7" cy="2" r="1.5" fill="#fbbf24" opacity="0.6" />
+            <circle cx="17" cy="2" r="1.5" fill="#fbbf24" opacity="0.6" />
+          </svg>
+        </span>
         <span class="logo-text">Agri<span class="logo-accent">Swap</span></span>
       </a>
 
@@ -33,10 +47,14 @@
       </div>
 
       <ul class="navbar__links" id="nav-links">
-        <li><a href="#/" class="nav-link" data-page="home"><i data-lucide="home"></i><span>Home</span></a></li>
-        <li><a href="#/browse" class="nav-link" data-page="browse"><i data-lucide="layout-grid"></i><span>Browse</span></a></li>
-        <li><a href="#/create" class="nav-link auth-only" data-page="create"><i data-lucide="plus-circle"></i><span>List Item</span></a></li>
-        <li><a href="#/exchanges" class="nav-link auth-only" data-page="exchanges"><i data-lucide="repeat"></i><span>Exchanges</span></a></li>
+        <li><a href="#/dashboard" class="nav-link" data-page="dashboard"><i
+              data-lucide="layout-dashboard"></i><span>Dashboard</span></a></li>
+        <li><a href="#/browse" class="nav-link" data-page="browse"><i data-lucide="store"></i><span>Barter
+              Market</span></a></li>
+        <li><a href="#/exchanges" class="nav-link auth-only" data-page="exchanges"><i
+              data-lucide="globe"></i><span>Export Connect</span></a></li>
+        <li><a href="#/profile/me" class="nav-link auth-only" data-page="profile"><i
+              data-lucide="user"></i><span>Profile</span></a></li>
       </ul>
 
       <div class="navbar__actions">
@@ -47,34 +65,37 @@
         </div>
         <!-- Shown when logged in -->
         <div class="user-actions hidden" id="user-actions">
-          <a href="#/dashboard" class="nav-link" data-page="dashboard"><i data-lucide="layout-dashboard"></i><span>Dashboard</span></a>
-          <div class="user-avatar" id="user-avatar">
-            <div class="avatar-circle" id="avatar-circle">R</div>
-            <div class="avatar-dropdown hidden" id="avatar-dropdown">
-              <a href="#/profile/me"><i data-lucide="user"></i> My Profile</a>
-              <a href="#/my-listings"><i data-lucide="package"></i> My Listings</a>
-              <hr />
-              <a href="#" id="logout-btn"><i data-lucide="log-out"></i> Logout</a>
+          <a href="#/dashboard" class="nav-link" data-page="dashboard"><i
+              data-lucide="layout-dashboard"></i><span>Dashboard</span></a>
+          <div style="display:flex;align-items:center;gap:0.5rem;margin-left:0.5rem;">
+            <span id="user-display-name" style="font-weight:600;font-size:var(--fs-sm);color:var(--clr-text-1);"></span>
+            <div class="user-avatar" id="user-avatar">
+              <div class="avatar-circle" id="avatar-circle">R</div>
+              <div class="avatar-dropdown hidden" id="avatar-dropdown">
+                <a href="#/profile/me"><i data-lucide="user"></i> My Profile</a>
+                <a href="#/my-listings"><i data-lucide="package"></i> My Listings</a>
+                <hr />
+                <a href="#" id="logout-btn"><i data-lucide="log-out"></i> Logout</a>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <button class="navbar__hamburger" id="hamburger" aria-label="Toggle menu">
-        <span></span><span></span><span></span>
-      </button>
-    </div>
+        <button class="navbar__hamburger" id="hamburger" aria-label="Toggle menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
   </nav>
 
   <!-- ===== MOBILE NAV OVERLAY ===== -->
   <div class="mobile-nav-overlay hidden" id="mobile-nav-overlay">
     <div class="mobile-nav">
       <ul>
-        <li><a href="#/">Home</a></li>
-        <li><a href="#/browse">Browse Market</a></li>
-        <li><a href="#/create">List an Item</a></li>
-        <li><a href="#/exchanges">My Exchanges</a></li>
         <li><a href="#/dashboard">Dashboard</a></li>
+        <li><a href="#/browse">Barter Market</a></li>
+        <li><a href="#/exchanges">Export Connect</a></li>
+        <li><a href="#/profile/me">Profile</a></li>
+        <li><a href="#/create">Post Barter Request</a></li>
         <li><a href="#/login" class="btn btn--primary btn--block">Log In</a></li>
       </ul>
     </div>
@@ -95,8 +116,19 @@
   <footer class="footer">
     <div class="container footer__inner">
       <div class="footer__brand">
-        <span class="logo-icon">🌾</span>
-        <span class="logo-text">Agri<span class="logo-accent">Swap</span></span>
+        <div class="footer-logo">
+          <span class="logo-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+              <path d="M12 22V12M12 12C12 12 8 8 4 7M12 12C12 12 16 8 20 7M12 12C12 12 9 6 7 2M12 12C12 12 15 6 17 2"
+                stroke="#22c55e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+              <circle cx="4" cy="7" r="1.5" fill="#22c55e" opacity="0.6" />
+              <circle cx="20" cy="7" r="1.5" fill="#22c55e" opacity="0.6" />
+              <circle cx="7" cy="2" r="1.5" fill="#fbbf24" opacity="0.6" />
+              <circle cx="17" cy="2" r="1.5" fill="#fbbf24" opacity="0.6" />
+            </svg>
+          </span>
+          <span class="logo-text">Agri<span class="logo-accent">Swap</span></span>
+        </div>
         <p class="footer__tagline">Empowering farmers through fair, transparent exchange.</p>
       </div>
       <div class="footer__links">
@@ -120,16 +152,17 @@
   </footer>
 
   <!-- ===== SCRIPTS (modules) ===== -->
+  <script type="module" src="js/firebase-config.js"></script>
   <script src="js/state.js"></script>
   <script src="js/api.js"></script>
-  <script src="js/components/navbar.js"></script>
-  <script src="js/components/footer.js"></script>
-  <script src="js/components/listingCard.js"></script>
-  <script src="js/components/exchangeModal.js"></script>
-  <script src="js/components/filterSidebar.js"></script>
-  <script src="js/components/statsCard.js"></script>
-  <script src="js/components/ratingStars.js"></script>
-  <script src="js/components/toast.js"></script>
+  <script src="components/navbar.js"></script>
+  <script src="components/footer.js"></script>
+  <script src="components/listingCard.js"></script>
+  <script src="components/exchangeModal.js"></script>
+  <script src="components/filterSidebar.js"></script>
+  <script src="components/statsCard.js"></script>
+  <script src="components/ratingStars.js"></script>
+  <script src="components/toast.js"></script>
   <script src="js/pages/landing.js"></script>
   <script src="js/pages/auth.js"></script>
   <script src="js/pages/dashboard.js"></script>
@@ -141,4 +174,5 @@
   <script src="js/pages/profile.js"></script>
   <script src="js/app.js"></script>
 </body>
+
 </html>
