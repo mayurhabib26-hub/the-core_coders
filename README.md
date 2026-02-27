@@ -1,1 +1,1 @@
-smart barter system..
+smart barter system
