@@ -38,7 +38,8 @@ const verifyApiKey = (req, res, next) => {
     if (req.path === '/') return next();
 
     const clientApiKey = req.headers['x-api-key'];
-    const serverApiKey = process.env.SECRET_API_KEY;
+    // Fallback to the exact string used in api.js because .env is gitignored
+    const serverApiKey = process.env.SECRET_API_KEY || 'agriswap-hackathon-2026';
 
     if (!clientApiKey || clientApiKey !== serverApiKey) {
         console.warn(`⚠️ Blocked unauthorized request to ${req.path}`);
@@ -106,11 +107,25 @@ app.post('/api/auth/google', async (req, res) => {
     }
 
     try {
-        // Verify the token using Firebase Admin SDK securely
-        const decodedToken = await admin.auth().verifyIdToken(idToken);
-        const { uid, email, name, picture } = decodedToken;
+        let uid, email, name, picture;
 
-        // At this point, the user is 100% verified. 
+        if (db) {
+            // Verify the token using Firebase Admin SDK securely
+            const decodedToken = await admin.auth().verifyIdToken(idToken);
+            uid = decodedToken.uid;
+            email = decodedToken.email;
+            name = decodedToken.name;
+            picture = decodedToken.picture;
+        } else {
+            console.log("⚠️ Mock mode: Bypassing real Firebase verification (missing credentials)");
+            // Mock authentication if Firebase isn't configured
+            uid = "mock-user-" + Date.now();
+            email = "demo@example.com";
+            name = "Demo User";
+            picture = "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&h=100&fit=crop";
+        }
+
+        // At this point, the user is verified or conditionally mocked.
         // We simulate logging them in by issuing a mock native token to use with our other APIs.
         const mockServerToken = "secure-jwt-token-" + uid;
 
