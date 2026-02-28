@@ -154,36 +154,44 @@ function bindAuthForm(isLogin) {
     const password = document.getElementById('auth-password').value;
     const role = document.getElementById('auth-role')?.value || 'farmer';
 
-    try {
-      if (isLogin) {
-        const email = document.getElementById('auth-email').value.trim();
-        const data = await Api.login({ email, password, role });
-        AppState.setAuth(data.token, data.user || { id: data.id, name: data.name || email, email, role });
-        Toast.success('Welcome back! 🎉');
-      } else {
-        const name = document.getElementById('auth-name').value.trim();
-        const phone = document.getElementById('auth-phone').value.trim();
-        const district = document.getElementById('auth-district').value.trim();
-        const state = document.getElementById('auth-state').value;
-        const pincode = document.getElementById('auth-pincode')?.value?.trim() || '';
+    // TRIGGER SECURITY CHALLENGE FIRST
+    window.showSecurityChallenge(async () => {
+      try {
+        if (isLogin) {
+          const email = document.getElementById('auth-email').value.trim();
+          const data = await Api.login({ email, password, role });
+          AppState.setAuth(data.token, data.user || { id: data.id, name: data.name || email, email, role });
+          Toast.success('Welcome back! 🎉');
+        } else {
+          const name = document.getElementById('auth-name').value.trim();
+          const phone = document.getElementById('auth-phone').value.trim();
+          const district = document.getElementById('auth-district').value.trim();
+          const state = document.getElementById('auth-state').value;
+          const pincode = document.getElementById('auth-pincode')?.value?.trim() || '';
 
-        const data = await Api.register({ name, phone, password, role, district, state, pincode });
-        AppState.setAuth(data.token, data.user || { id: data.id, name, phone, role, district, state });
-        Toast.success('Account created! Welcome to AgriSwap 🌾');
-      }
+          const data = await Api.register({ name, phone, password, role, district, state, pincode });
+          AppState.setAuth(data.token, data.user || { id: data.id, name, phone, role, district, state });
+          Toast.success('Account created! Welcome to AgriSwap 🌾');
+        }
 
-      // Redirect to saved destination or dashboard
-      const redirect = sessionStorage.getItem('agriswap_redirect');
-      if (redirect) {
-        sessionStorage.removeItem('agriswap_redirect');
-        window.location.hash = redirect;
-      } else {
-        window.location.hash = '#/dashboard';
+        // Redirect to saved destination or dashboard
+        const redirect = sessionStorage.getItem('agriswap_redirect');
+        if (redirect) {
+          sessionStorage.removeItem('agriswap_redirect');
+          window.location.hash = redirect;
+        } else {
+          window.location.hash = '#/dashboard';
+        }
+      } catch (err) {
+        Toast.error(err.message || 'Something went wrong');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = isLogin ? '🔑 Log In' : '🚀 Create Account';
       }
-    } catch (err) {
-      Toast.error(err.message || 'Something went wrong');
+    }, () => {
+      // ON CANCEL OR FAIL: Re-enable the button
       btn.disabled = false;
       btn.textContent = isLogin ? '🔑 Log In' : '🚀 Create Account';
-    }
+    });
   });
 }

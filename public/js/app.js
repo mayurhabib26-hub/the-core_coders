@@ -101,6 +101,72 @@ if (document.readyState !== 'loading') {
     Router.init();
 }
 
+// ── SECURITY: Number Matching Challenge ──
+window.showSecurityChallenge = function (onSuccess, onFailOrCancel) {
+    // Generate Target and two decoys (1-99)
+    const target = Math.floor(Math.random() * 90) + 10;
+    let decoy1 = Math.floor(Math.random() * 90) + 10;
+    while (decoy1 === target) decoy1 = Math.floor(Math.random() * 90) + 10;
+    let decoy2 = Math.floor(Math.random() * 90) + 10;
+    while (decoy2 === target || decoy2 === decoy1) decoy2 = Math.floor(Math.random() * 90) + 10;
+
+    // Shuffle options
+    const options = [target, decoy1, decoy2].sort(() => Math.random() - 0.5);
+
+    // Create Modal HTML
+    const overlay = document.createElement('div');
+    overlay.id = 'security-challenge-overlay';
+    overlay.style.position = 'fixed';
+    overlay.style.inset = '0';
+    overlay.style.backgroundColor = 'rgba(0,0,0,0.8)';
+    overlay.style.backdropFilter = 'blur(4px)';
+    overlay.style.zIndex = '9999';
+    overlay.style.display = 'flex';
+    overlay.style.alignItems = 'center';
+    overlay.style.justifyContent = 'center';
+
+    const modal = document.createElement('div');
+    modal.style.backgroundColor = 'var(--clr-surface)';
+    modal.style.padding = '2rem';
+    modal.style.borderRadius = '1rem';
+    modal.style.textAlign = 'center';
+    modal.style.maxWidth = '320px';
+    modal.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
+
+    modal.innerHTML = `
+        <h3 style="margin-bottom:0.5rem;color:var(--clr-text-1);">Security Verification</h3>
+        <p style="margin-bottom:1.5rem;color:var(--clr-text-2);font-size:0.95rem;">
+            Please tap the number <strong style="font-size:1.4rem;color:var(--clr-primary);">${target}</strong> to prove you are human.
+        </p>
+        <div style="display:flex;gap:1rem;justify-content:center;">
+            ${options.map(num => `
+                <button class="btn btn--outline" style="width:60px;height:60px;font-size:1.2rem;border-radius:50%;padding:0;color:var(--clr-primary);border-color:var(--clr-primary);" onclick="window.submitSecurityChallenge(${num}, ${target})">
+                    ${num}
+                </button>
+            `).join('')}
+        </div>
+        <button class="btn btn--ghost" style="margin-top:1.5rem;font-size:0.85rem;" onclick="const ov=document.getElementById('security-challenge-overlay'); if(ov){ document.body.removeChild(ov); if(window.securityChallengeFail) window.securityChallengeFail(); }">Cancel</button>
+    `;
+
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+
+    window.securityChallengeFail = onFailOrCancel;
+
+    // Global responder
+    window.submitSecurityChallenge = (selected, actual) => {
+        const ov = document.getElementById('security-challenge-overlay');
+        if (ov) document.body.removeChild(ov);
+
+        if (selected === actual) {
+            onSuccess();
+        } else {
+            if (typeof Toast !== 'undefined') Toast.error("Security verification failed. Try again.");
+            if (onFailOrCancel) onFailOrCancel();
+        }
+    };
+};
+
 // ── EXTERNAL: Google Auth Handler ──
 window.handleGoogleLogin = async () => {
     try {
@@ -112,51 +178,58 @@ window.handleGoogleLogin = async () => {
         const user = result.user;
         const idToken = await user.getIdToken();
 
-        // Send token to our secure Node.js backend to verify
-        // We use the existing Api utility which automatically attaches the x-api-key
-        const response = await Api.post('/auth/google', {
-            idToken: idToken,
-            role: 'farmer' // Default role for Hackathon
+        // Pass security check before fully granting session
+        window.showSecurityChallenge(async () => {
+            try {
+                const response = await Api.post('/auth/google', {
+                    idToken: idToken,
+                    role: 'farmer' // Default role for Hackathon
+                });
+
+                AppState.setAuth(response.token, response.user);
+
+                const redirect = sessionStorage.getItem('agriswap_redirect');
+                if (redirect) {
+                    sessionStorage.removeItem('agriswap_redirect');
+                    window.location.hash = redirect;
+                } else {
+                    window.location.hash = '#/dashboard';
+                }
+                if (typeof Toast !== 'undefined') Toast.success(`Welcome, ${response.user.name}! 🎉`);
+            } catch (backendError) {
+                console.error(backendError);
+                if (typeof Toast !== 'undefined') Toast.error("Backend validation failed.");
+            }
         });
 
-        // Store secure backend session in local AppState
-        AppState.setAuth(response.token, response.user);
-
-        // If there's an intended redirect
-        const redirect = sessionStorage.getItem('agriswap_redirect');
-        if (redirect) {
-            sessionStorage.removeItem('agriswap_redirect');
-            window.location.hash = redirect;
-        } else {
-            window.location.hash = '#/dashboard';
-        }
-
-        if (typeof Toast !== 'undefined') Toast.success(`Welcome, ${response.user.name}! 🎉`);
     } catch (error) {
         console.error("Google Login Error:", error);
 
         // Fallback Mechanism for broken Firebase API Key
         console.warn("⚠️ Firebase Authentication failed. Falling back to secure mock login system.");
-        try {
-            const fallbackResponse = await Api.post('/login', {
-                email: "demo.google@agriswap.com",
-                password: "mock-google-password",
-                role: 'farmer'
-            });
 
-            AppState.setAuth(fallbackResponse.token, fallbackResponse.user);
+        window.showSecurityChallenge(async () => {
+            try {
+                const fallbackResponse = await Api.post('/login', {
+                    email: "demo.google@agriswap.com",
+                    password: "mock-google-password",
+                    role: 'farmer'
+                });
 
-            const redirect = sessionStorage.getItem('agriswap_redirect');
-            if (redirect) {
-                sessionStorage.removeItem('agriswap_redirect');
-                window.location.hash = redirect;
-            } else {
-                window.location.hash = '#/dashboard';
+                AppState.setAuth(fallbackResponse.token, fallbackResponse.user);
+
+                const redirect = sessionStorage.getItem('agriswap_redirect');
+                if (redirect) {
+                    sessionStorage.removeItem('agriswap_redirect');
+                    window.location.hash = redirect;
+                } else {
+                    window.location.hash = '#/dashboard';
+                }
+                if (typeof Toast !== 'undefined') Toast.success(`Google Demo Login Successful! 🎉`);
+            } catch (fallbackError) {
+                console.error("Mock Fallback Error:", fallbackError);
+                if (typeof Toast !== 'undefined') Toast.error("Authentication completely failed. Please check server logs.");
             }
-            if (typeof Toast !== 'undefined') Toast.success(`Google Demo Login Successful! 🎉`);
-        } catch (fallbackError) {
-            console.error("Mock Fallback Error:", fallbackError);
-            if (typeof Toast !== 'undefined') Toast.error("Authentication completely failed. Please check server logs.");
-        }
+        });
     }
 };
